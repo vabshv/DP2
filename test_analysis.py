@@ -5,7 +5,7 @@ from analysis import generate_sales_report, generate_orders_dynamics
 
 
 class TestAnalysis(unittest.TestCase):
-    """Простые тесты для генерации отчетов"""
+    """Тесты для генерации отчетов"""
 
     def setUp(self):
         """Подготовка данных перед каждым тестом"""
