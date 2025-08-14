@@ -1,7 +1,6 @@
 import unittest
 from models import Customer, Product, Order
 
-
 class TestModels(unittest.TestCase):
     """Простые тесты для моделей данных"""
 
