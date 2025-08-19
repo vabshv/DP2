@@ -7,13 +7,15 @@
 
 class Customer:
     """Класс для представления клиента"""
-    def __init__(self, id=None, name="", phone="", email="", address=""):
+    def __init__(self, id=None, name="", phone="", email="", address=""): # Конструктор класса, принимающий параметры для инициализации объекта.
         self.id = id          # Уникальный идентификатор
         self.name = name      # ФИО клиента
         self.phone = phone    # Номер телефона
         self.email = email    # Email адрес
         self.address = address  # Адрес доставки
 
+    # Специальный метод, определяющий строку, которую вернет объект при выводе
+    # Используется для удобного вывода информации о клиенте
     def __repr__(self):
         return f"Customer(id={self.id}, name={self.name})"
 
