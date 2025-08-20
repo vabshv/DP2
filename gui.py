@@ -304,47 +304,56 @@ class EditOrderDialog(tk.Toplevel):
         self.parent.load_orders()
         self.destroy()
 
+# Класс наследуется от класса Tk, предоставляя базовую структуру окна приложения.
 class App(tk.Tk):
     """Основной класс приложения"""
-
+    # инициализируется окно приложения, задаётся название (title) и размер окна (geometry)
     def __init__(self):
         super().__init__()
-        self.title("Менеджер интернет-магазина")
-        self.geometry("1000x700")
+        self.title("Менеджер интернет-магазина")  # заголовок окна
+        self.geometry("1000x700")   # Размер окна приложения
 
         # Создаем вкладки
+        # Позволит пользователям переключаться между разными секциями программы
         self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10) # Заполняем всё пространство окна
 
-        # Создаем фреймы для вкладок
+        # Создание отдельных фреймов для каждой вкладки
+        # Каждый фрейм соответствует своей вкладке: клиенты, товары, заказы, отчёты
         self.customer_tab = ttk.Frame(self.notebook)
         self.product_tab = ttk.Frame(self.notebook)
         self.order_tab = ttk.Frame(self.notebook)
         self.report_tab = ttk.Frame(self.notebook)
 
+        # Добавляем созданные фреймы к notebooks с соответствующими названиями
         self.notebook.add(self.customer_tab, text="Клиенты")
         self.notebook.add(self.product_tab, text="Товары")
         self.notebook.add(self.order_tab, text="Заказы")
         self.notebook.add(self.report_tab, text="Отчеты")
 
-        # Инициализация вкладок
+        # Инитируем вкладки, вызывая соответствующие методы
         self.init_customer_tab()
         self.init_product_tab()
         self.init_order_tab()
         self.init_report_tab()
 
     def init_customer_tab(self):
-        """Инициализация вкладки с клиентами"""
-        # Таблица для отображения клиентов
+        """
+        Инициализирует вкладку "Клиенты".
+
+        Этот метод создаёт таблицу для отображения клиентов, панель инструментов с кнопками
+        для добавления, изменения и удаления клиентов, а также систему фильтрации и сортировки.
+        """
+        # Столбцы таблицы (колонки, которые будут видны пользователю)
         columns = ("ID", "ФИО", "Телефон", "Email", "Адрес")
         self.customer_tree = ttk.Treeview(self.customer_tab, columns=columns, show="headings")
 
-        # Настройка столбцов
+        # Установка заголовков колонок и определение размеров
         for col in columns:
             self.customer_tree.heading(col, text=col, command=lambda c=col: self.sort_treeview(self.customer_tree, c))
             self.customer_tree.column(col, width=150)
 
-        # Добавляем вертикальную прокрутку
+        # Прокручиваемая область справа от таблицы (вертикальная полоса прокрутки)
         scrollbar = ttk.Scrollbar(self.customer_tab, orient=tk.VERTICAL, command=self.customer_tree.yview)
         self.customer_tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -354,12 +363,12 @@ class App(tk.Tk):
         btn_frame = tk.Frame(self.customer_tab)
         btn_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Кнопки операций
+        # Кнопки для добавления, редактирования и удаления клиента
         tk.Button(btn_frame, text="Добавить", command=self.add_customer).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Редактировать", command=self.edit_customer).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Удалить", command=self.delete_customer).pack(side=tk.LEFT, padx=5)
 
-        # Кнопки импорта/экспорта
+        # Импорт и экспорт данных (работа с файлами .csv)
         tk.Button(btn_frame, text="Импорт CSV", command=self.import_customer_csv).pack(side=tk.RIGHT, padx=5)
         tk.Button(btn_frame, text="Экспорт CSV", command=self.export_customer_csv).pack(side=tk.RIGHT, padx=5)
 
@@ -367,11 +376,12 @@ class App(tk.Tk):
         filter_frame = tk.Frame(self.customer_tab)
         filter_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Поля для фильтрации
+        # Поле для ввода имени клиента
         tk.Label(filter_frame, text="Фильтр по ФИО:").grid(row=0, column=0, padx=5)
         self.customer_name_filter = tk.Entry(filter_frame, width=20)
         self.customer_name_filter.grid(row=0, column=1, padx=5)
 
+        # Остальные поля фильтрации по телефону и Email
         tk.Label(filter_frame, text="Телефон:").grid(row=0, column=2, padx=5)
         self.customer_phone_filter = tk.Entry(filter_frame, width=15)
         self.customer_phone_filter.grid(row=0, column=3, padx=5)
@@ -383,27 +393,31 @@ class App(tk.Tk):
         # Кнопка применения фильтра
         tk.Button(filter_frame, text="Применить фильтр", command=self.apply_customer_filters).grid(row=0, column=6,
                                                                                                    padx=10)
-
         # Кнопка сброса фильтра
         tk.Button(filter_frame, text="Сбросить", command=self.reset_customer_filters).grid(row=0, column=7, padx=5)
 
 
 
-        # Загрузка данных
+        # Подгружаем список клиентов из базы данных
         self.load_customers()
 
     def init_product_tab(self):
-        """Инициализация вкладки с товарами"""
-        # Таблица для отображения товаров
+        """
+        Инициализирует вкладку "Товары".
+
+        Похожий принцип организации, как и у вкладки "Клиенты": таблица, панель инструментов,
+        система фильтрации и сортировки.
+        """
+        # Определение колонок для таблицы товаров
         columns = ("ID", "Название", "Цена")
         self.product_tree = ttk.Treeview(self.product_tab, columns=columns, show="headings")
 
-        # Настройка столбцов
+        # Названия колонок и ширина
         for col in columns:
             self.product_tree.heading(col, text=col, command=lambda c=col: self.sort_treeview(self.product_tree, c))
             self.product_tree.column(col, width=150)
 
-        # Добавляем вертикальную прокрутку
+        # Добавляем полосу прокрутки справа
         scrollbar = ttk.Scrollbar(self.product_tab, orient=tk.VERTICAL, command=self.product_tree.yview)
         self.product_tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -413,12 +427,12 @@ class App(tk.Tk):
         btn_frame = tk.Frame(self.product_tab)
         btn_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Кнопки операций
+        # Основная функциональность: добавить, изменить, удалить продукт
         tk.Button(btn_frame, text="Добавить", command=self.add_product).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Редактировать", command=self.edit_product).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Удалить", command=self.delete_product).pack(side=tk.LEFT, padx=5)
 
-        # Кнопки импорта/экспорта
+        # Работа с файлами (.csv): импорт и экспорт
         tk.Button(btn_frame, text="Импорт CSV", command=self.import_product_csv).pack(side=tk.RIGHT, padx=5)
         tk.Button(btn_frame, text="Экспорт CSV", command=self.export_product_csv).pack(side=tk.RIGHT, padx=5)
 
@@ -426,7 +440,7 @@ class App(tk.Tk):
         filter_frame = tk.Frame(self.product_tab)
         filter_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Поля для фильтрации
+        # Фильтрация товаров по названию и диапазону цен
         tk.Label(filter_frame, text="Название:").grid(row=0, column=0, padx=5)
         self.product_name_filter = tk.Entry(filter_frame, width=20)
         self.product_name_filter.grid(row=0, column=1, padx=5)
@@ -450,17 +464,21 @@ class App(tk.Tk):
         self.load_products()
 
     def init_order_tab(self):
-        """Инициализация вкладки с заказами"""
+        """
+        Инициализирует вкладку "Заказы".
+        Подобная организация и функционалы, как и у предыдущих вкладок.
+
+        """
         # Таблица для отображения заказов
         columns = ("ID", "ФИО клиента", "Телефон", "Товар", "Цена", "Дата заказа")
         self.order_tree = ttk.Treeview(self.order_tab, columns=columns, show="headings")
 
-        # Настройка столбцов
+        # Настраиваем заголовки и ширину колонок
         for col in columns:
             self.order_tree.heading(col, text=col, command=lambda c=col: self.sort_treeview(self.order_tree, c))
             self.order_tree.column(col, width=150)
 
-        # Добавляем вертикальную прокрутку
+        # Прокрутка справа
         scrollbar = ttk.Scrollbar(self.order_tab, orient=tk.VERTICAL, command=self.order_tree.yview)
         self.order_tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -470,7 +488,7 @@ class App(tk.Tk):
         btn_frame = tk.Frame(self.order_tab)
         btn_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Кнопки операций
+        # Кнопки добавления, редактирования и удаления заказов
         tk.Button(btn_frame, text="Добавить", command=self.add_order).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Редактировать", command=self.edit_order).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Удалить", command=self.delete_order).pack(side=tk.LEFT, padx=5)
@@ -483,7 +501,7 @@ class App(tk.Tk):
         filter_frame = tk.Frame(self.order_tab)
         filter_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        # Поля для фильтрации
+        # Поля фильтрации по клиентским данным и датам
         tk.Label(filter_frame, text="Клиент:").grid(row=0, column=0, padx=5)
         self.order_customer_filter = tk.Entry(filter_frame, width=20)
         self.order_customer_filter.grid(row=0, column=1, padx=5)
@@ -507,12 +525,15 @@ class App(tk.Tk):
         # Кнопка сброса фильтра
         tk.Button(filter_frame, text="Сбросить", command=self.reset_order_filters).grid(row=0, column=9, padx=5)
 
-        # Загрузка данных
+        # Подгрузка заказов из базы данных
         self.load_orders()
 
     def init_report_tab(self):
-        """Инициализация вкладки с отчетами"""
-        # Фрейм для кнопок генерации отчетов
+        """
+        Инициализирует вкладку "Отчеты".
+        Позволяет генерировать отчёты и выводить уведомления о результатах.
+        """
+        # Панель инструментов с кнопками генерации отчётов
         btn_frame = tk.Frame(self.report_tab)
         btn_frame.pack(fill=tk.X, padx=10, pady=20)
 
@@ -527,35 +548,29 @@ class App(tk.Tk):
         self.report_info = tk.Text(self.report_tab, height=10, state=tk.DISABLED)
         self.report_info.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Метка для инструкций
+        # Информация о расположении отчётов
         tk.Label(self.report_tab, text="Отчеты сохраняются в файлы в текущей директории",
                  font=("Arial", 10)).pack(side=tk.BOTTOM, pady=10)
 
-    # Методы для работы с клиентами
-    def load_customers(self):
-        """Загружает клиентов из БД и отображает в таблице"""
-        for item in self.customer_tree.get_children():
-            self.customer_tree.delete(item)
 
-        customers = db.get_all_customers()
-        for customer in customers:
-            self.customer_tree.insert("", tk.END, values=customer)
+    # Функционал работы с клиентами
 
     def add_customer(self):
-        """Открывает диалог добавления нового клиента"""
-        EditCustomerDialog(self)
+        """Открывает форму для добавления нового клиента"""
+        EditCustomerDialog(self) # Дополнительный модуль EditCustomerDialog
 
     def edit_customer(self):
-        """Открывает диалог редактирования выбранного клиента"""
-        selected = self.customer_tree.selection()
+        """Открывает форму для редактирования существующего клиента.    """
+        selected = self.customer_tree.selection() # Выбираем выделенного клиента
         if not selected:
             messagebox.showwarning("Предупреждение", "Выберите клиента для редактирования")
             return
-
+        # Извлекаем ID клиента
         item = self.customer_tree.item(selected[0])
         customer_id = item['values'][0]
+        # Используем дополнительный модуль для подкачки данных по найденному ID
         customer_data = db.fetch_query("SELECT * FROM customers WHERE id=?", (customer_id,))[0]
-
+        # Запоминаем поля для редактирования
         customer = Customer(
             id=customer_data[0],
             name=customer_data[1],
@@ -572,126 +587,106 @@ class App(tk.Tk):
         if not selected:
             messagebox.showwarning("Предупреждение", "Выберите клиента для удаления")
             return
-
+        # Подтверждаем удаление
         if messagebox.askyesno("Подтверждение", "Удалить выбранного клиента?"):
-            item = self.customer_tree.item(selected[0])
-            customer_id = item['values'][0]
-            db.delete_customer(customer_id)
-            self.load_customers()
+            item = self.customer_tree.item(selected[0]) # выбран элемент дерева customer_tree (клиент),
+            customer_id = item['values'][0] # Определение ID удаляемого клиента
+            db.delete_customer(customer_id) # Удаление клиента из базы данных
+            self.load_customers() # Перезагружаем список клиентов
 
     def import_customer_csv(self):
         """Импортирует клиентов из CSV файла"""
-        filepath = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
+        filepath = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")]) # Выбор пути к файлу
         if not filepath:
-            return
-
+            return # Выходим если файл не выбран
+        # Чтение данных из файла
         try:
             with open(filepath, newline='', encoding='utf-8') as f:
-                reader = csv.reader(f)
+                reader = csv.reader(f) # Создается объект чтения CSV-файлов
                 next(reader)  # Пропускаем заголовок
                 for row in reader:
                     if len(row) >= 4:
                         customer = Customer(
-                            name=row[0].strip(),
-                            phone=row[1].strip(),
-                            email=row[2].strip(),
-                            address=row[3].strip()
+                            name=row[0].strip(), # Имя клиента (очищает лишние пробелы перед и после значения)
+                            phone=row[1].strip(), # Телефон клиента
+                            email=row[2].strip(), # Email клиента
+                            address=row[3].strip() # Адрес клиента
                         )
-                        db.add_customer(customer)
+                        db.add_customer(customer) # новый клиент добавляется в базу данных
 
-            self.load_customers()
+            self.load_customers() # обновляет список клиентов
             messagebox.showinfo("Успех", "Данные успешно импортированы")
-        except Exception as e:
+        except Exception as e: # Если возникает ошибка
             messagebox.showerror("Ошибка", f"Ошибка импорта: {str(e)}")
 
     def export_customer_csv(self):
         """Экспортирует клиентов в CSV файл"""
-        filepath = filedialog.asksaveasfilename(
+        filepath = filedialog.asksaveasfilename( # Запрашиваем путь к файлу для сохранения
             defaultextension=".csv",
             filetypes=[("CSV Files", "*.csv")]
         )
         if not filepath:
-            return
+            return # Выходим если файла нет
 
         try:
-            with open(filepath, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerow(["ФИО", "Телефон", "Email", "Адрес"])
+            with open(filepath, 'w', newline='', encoding='utf-8') as f: # Файл открывается в режиме записи ('w'),
+                writer = csv.writer(f) # Создаем объект записи CSV
+                writer.writerow(["ФИО", "Телефон", "Email", "Адрес"]) # Заголовки столбцов
 
-                customers = db.get_all_customers()
+                customers = db.get_all_customers() # олучение всех клиентов из базы
                 for customer in customers:
-                    writer.writerow(customer[1:])  # Пропускаем ID
+                    writer.writerow(customer[1:])  # Пропускаем ID путем среза customer[1:]
 
             messagebox.showinfo("Успех", "Данные успешно экспортированы")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка экспорта: {str(e)}")
+
     def apply_customer_filters(self):
         """Применяет фильтры для клиентов"""
         self.load_customers()
 
     def reset_customer_filters(self):
         """Сбрасывает фильтры клиентов"""
-        self.customer_name_filter.delete(0, tk.END)
+        self.customer_name_filter.delete(0, tk.END) # очистка всего текста, внутри поля
         self.customer_phone_filter.delete(0, tk.END)
         self.customer_email_filter.delete(0, tk.END)
-        self.load_customers()
+        self.load_customers() # Обновление списка клиентов
 
     def load_customers(self):
         """Загружает клиентов с учетом фильтров"""
+        # Удаляем все существующие элементы из дерева клиентов
+        # Это необходимо для обновления представления после изменений фильтров
         for item in self.customer_tree.get_children():
             self.customer_tree.delete(item)
 
-        # Получаем значения фильтров
+        # Получаем значения фильтров из соответствующих полей ввода,
+        # преобразуя их в нижний регистр и обрезая лишнее пространство
         name_filter = self.customer_name_filter.get().strip().lower()
         phone_filter = self.customer_phone_filter.get().strip().lower()
         email_filter = self.customer_email_filter.get().strip().lower()
 
-        # Загрузка данных с фильтрацией
+        # Выполняем запрос ко всей базе данных клиентов
         customers = db.get_all_customers()
+        # Проходим по каждому клиенту и применяем фильтры
         for customer in customers:
-            # Применяем фильтры
-            matches = True
-
-            if name_filter and name_filter not in customer[1].lower():
+            matches = True # Изначально считаем, что клиент соответствует условиям фильтрации
+            #   если фильтр пустой (существование самого фильтра) and присутствует ли содержимое фильтра в соответствующем поле
+            if name_filter and name_filter not in customer[1].lower(): # customer[1] — это имя клиента
                 matches = False
 
-            if phone_filter and phone_filter not in customer[2].lower():
+            if phone_filter and phone_filter not in customer[2].lower(): # customer[2] — номер телефона
                 matches = False
 
-            if email_filter and email_filter not in customer[3].lower():
+            if email_filter and email_filter not in customer[3].lower(): # customer[3] — email
                 matches = False
 
+            # Если клиент прошёл проверку по всем фильтрам, добавляем его в дерево клиентов
             if matches:
                 self.customer_tree.insert("", tk.END, values=customer)
 
-    # Аналогичные методы для товаров и заказов (load_products, add_product, edit_product и т.д.)
-    # Для краткости они не приведены, но реализуются по тому же принципу
+    # Аналогичные методы для товаров и заказов (load_orders, add_order, load_products, add_product,  edit_product и т.д.)
 
-    # def load_products(self):
-    #     """Загружает товары из БД и отображает в таблице"""
-    #     for item in self.product_tree.get_children():
-    #         self.product_tree.delete(item)
-    #
-    #     products = db.get_all_products()
-    #     for product in products:
-    #         self.product_tree.insert("", tk.END, values=product)
 
-    def add_product(self):
-        EditProductDialog(self)
-
-    # ... (аналогично для остальных методов товаров)
-
-    def load_orders(self):
-        """Загружает заказы из БД и отображает в таблице"""
-        for item in self.order_tree.get_children():
-            self.order_tree.delete(item)
-
-        orders = db.get_all_orders()
-        for order in orders:
-            self.order_tree.insert("", tk.END, values=order)
-
-    def add_order(self):
-        EditOrderDialog(self)
 
     def apply_product_filters(self):
         """Применяет фильтры для товаров"""
@@ -703,6 +698,9 @@ class App(tk.Tk):
         self.product_price_min_filter.delete(0, tk.END)
         self.product_price_max_filter.delete(0, tk.END)
         self.load_products()
+
+    # def add_product(self):
+    #     EditProductDialog(self)
 
     def load_products(self):
         """Загружает товары с учетом фильтров"""
@@ -741,6 +739,9 @@ class App(tk.Tk):
 
             if matches:
                 self.product_tree.insert("", tk.END, values=product)
+
+    # def add_order(self):
+    #     EditOrderDialog(self)
 
     def apply_order_filters(self):
         """Применяет фильтры для заказов"""
@@ -826,14 +827,6 @@ class App(tk.Tk):
             messagebox.showerror("Ошибка", f"Ошибка генерации отчета: {str(e)}")
 
 
-    # def load_products(self):
-    #     """Загружает товары из БД и отображает в таблице"""
-    #     for item in self.product_tree.get_children():
-    #         self.product_tree.delete(item)
-
-        products = db.get_all_products()
-        for product in products:
-            self.product_tree.insert("", tk.END, values=product)
 
     def add_product(self):
         """Открывает диалог добавления нового товара"""
@@ -921,14 +914,6 @@ class App(tk.Tk):
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка экспорта: {str(e)}")
 
-    # def load_orders(self):
-    #     """Загружает заказы из БД и отображает в таблице"""
-    #     for item in self.order_tree.get_children():
-    #         self.order_tree.delete(item)
-    #
-    #     orders = db.get_all_orders()
-    #     for order in orders:
-    #         self.order_tree.insert("", tk.END, values=order)
 
     def add_order(self):
         """Открывает диалог добавления нового заказа"""
