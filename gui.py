@@ -29,7 +29,6 @@ class EditCustomerDialog(tk.Toplevel): # Диалоговое окно для д
         self.geometry("400x300") # Установка начального размера окна:
         self.resizable(False, False) # Запрет изменения размера окна: ширины, высоты
 
-        # Создаем элементы формы
         # Создание и размещение меток для формы ввода данных клиента
         tk.Label(self, text="ФИО:").grid(row=0, column=0, padx=10, pady=10, sticky="e") # row=0, column=0 - первая строка, первый столбец, padx=10, pady=10 - внешние отступы по 10 пикселей по горизонтали и вертикали sticky="e" - выравнивание по правому краю (east) внутри ячейки сетки
         tk.Label(self, text="Телефон:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
@@ -90,7 +89,7 @@ class EditCustomerDialog(tk.Toplevel): # Диалоговое окно для д
                 "Ошибка",
                 "Некорректный формат email.\n"
                 "Правильный формат: имя@домен.зона\n"
-                "Пример: ivanov@example.com"
+                "Пример: ivanov@example.ru"
             )
             self.email_entry.focus_set()  # Устанавливаем фокус на поле
             is_valid = False
@@ -123,22 +122,23 @@ class EditProductDialog(tk.Toplevel): # Диалоговое окно для д�
         self.parent = parent
         self.product = product
 
-        self.title("Редактирование товара" if product else "Добавление товара")
-        self.geometry("400x200")
-        self.resizable(False, False)
+        self.title("Редактирование товара" if product else "Добавление товара") # Заголовок в зависимости передан ли product
+        self.geometry("400x200") # Установка начального размера окна:
+        self.resizable(False, False) # Запрет изменения размера окна
 
         # Создаем элементы формы
         tk.Label(self, text="Название:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
         tk.Label(self, text="Цена:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-
+        # Создание полей ввода
         self.name_entry = tk.Entry(self, width=30)
         self.price_entry = tk.Entry(self, width=30)
-
+        # Размещение полей ввода в сетке формы
         self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
         self.price_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
         # Заполняем поля, если редактируем существующий товар
         if product:
+            # Заполнение поля данными из объекта клиента
             self.name_entry.insert(0, product.name)
             self.price_entry.insert(0, str(product.price))
 
@@ -183,17 +183,18 @@ class EditOrderDialog(tk.Toplevel):
     """Диалоговое окно для добавления/редактирования заказа"""
 
     def __init__(self, parent, order=None):
+        # Инициализируем родительский класс (Toplevel)
         super().__init__(parent)
-        self.parent = parent
-        self.order = order
+        self.parent = parent # Связываем окно с родителем
+        self.order = order # Храним ссылку на редактируемый заказ (если таковой есть)
 
-        self.title("Редактирование заказа" if order else "Добавление заказа")
-        self.geometry("500x300")
-        self.resizable(False, False)
+        self.title("Редактирование заказа" if order else "Добавление заказа") # Название окна меняется в зависимости от наличия заказа
+        self.geometry("500x300") # Размер окна
+        self.resizable(False, False)    # Запрещаем менять размер окна
 
         # Получаем данные для выпадающих списков
-        self.customers = db.get_all_customers()
-        self.products = db.get_all_products()
+        self.customers = db.get_all_customers()  # Все клиенты
+        self.products = db.get_all_products()  # Все товары
 
         # Создаем элементы формы
         tk.Label(self, text="Клиент:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
@@ -201,37 +202,37 @@ class EditOrderDialog(tk.Toplevel):
         tk.Label(self, text="Дата заказа:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
 
         # Выпадающий список для клиентов
-        self.customer_var = tk.StringVar(self)
-        self.customer_combobox = ttk.Combobox(self, textvariable=self.customer_var, width=40)
+        self.customer_var = tk.StringVar(self) # Переменная для хранения выбранного клиента
+        self.customer_combobox = ttk.Combobox(self, textvariable=self.customer_var, width=40) # Виджет ComboBox для выбора клиента
 
         # Формируем список для отображения и словарь для сопоставления
-        self.customer_display = []
-        self.customer_id_map = {}
+        self.customer_display = [] # Список для отображения в Combobox
+        self.customer_id_map = {} # Словарь для сопоставления отображаемого текста с ID клиента
         for c in self.customers:
-            display_text = f"{c[1]} (ID: {c[0]}, тел: {c[2]})"
-            self.customer_display.append(display_text)
-            self.customer_id_map[display_text] = c[0]
+            display_text = f"{c[1]} (ID: {c[0]}, тел: {c[2]})" # Форматируем текст для отображения
+            self.customer_display.append(display_text) # Добавляем в список отображения
+            self.customer_id_map[display_text] = c[0] # Связываем отображаемое значение с ID клиента
 
-        self.customer_combobox['values'] = self.customer_display
-        self.customer_combobox.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        self.customer_combobox['values'] = self.customer_display # Устанавливаем список отображения в Combobox
+        self.customer_combobox.grid(row=0, column=1, padx=10, pady=10, sticky="w")  # Располагаем Combobox на форме
 
         # Выпадающий список для товаров
-        self.product_var = tk.StringVar(self)
-        self.product_combobox = ttk.Combobox(self, textvariable=self.product_var, width=40)
+        self.product_var = tk.StringVar(self)  # Переменная для хранения выбранного товара
+        self.product_combobox = ttk.Combobox(self, textvariable=self.product_var, width=40) # Виджет ComboBox для выбора товара
 
-        self.product_display = []
-        self.product_id_map = {}
+        self.product_display = []  # Список для отображения в Combobox
+        self.product_id_map = {}  # Словарь для сопоставления отображаемого текста с ID товара
         for p in self.products:
-            display_text = f"{p[1]} (ID: {p[0]}, цена: {p[2]} руб.)"
-            self.product_display.append(display_text)
-            self.product_id_map[display_text] = p[0]
+            display_text = f"{p[1]} (ID: {p[0]}, цена: {p[2]} руб.)" # Форматируем текст для отображения
+            self.product_display.append(display_text) # Добавляем в список отображения
+            self.product_id_map[display_text] = p[0] # Связываем отображаемое значение с ID товара
 
-        self.product_combobox['values'] = self.product_display
-        self.product_combobox.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        self.product_combobox['values'] = self.product_display # Устанавливаем список отображения в Combobox
+        self.product_combobox.grid(row=1, column=1, padx=10, pady=10, sticky="w") # Располагаем Combobox на форме
 
         # Поле для даты заказа
-        self.date_entry = tk.Entry(self, width=30)
-        self.date_entry.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+        self.date_entry = tk.Entry(self, width=30) # Виджет Entry для ввода даты
+        self.date_entry.grid(row=2, column=1, padx=10, pady=10, sticky="w") # Расположение на форме
         self.date_entry.insert(0, datetime.now().strftime("%Y-%m-%d"))  # Текущая дата
 
         # Заполняем поля, если редактируем существующий заказ
@@ -251,40 +252,40 @@ class EditOrderDialog(tk.Toplevel):
                 self.customer_var.set(customer_display)
             if product_display:
                 self.product_var.set(product_display)
-            self.date_entry.delete(0, tk.END)
-            self.date_entry.insert(0, order.date)
+            self.date_entry.delete(0, tk.END) # Очищаем поле даты
+            self.date_entry.insert(0, order.date) # Ставим дату заказа
 
         # Кнопки сохранения/отмены
-        btn_frame = tk.Frame(self)
-        btn_frame.grid(row=3, column=0, columnspan=2, pady=20)
+        btn_frame = tk.Frame(self) # Рамка для кнопок
+        btn_frame.grid(row=3, column=0, columnspan=2, pady=20) # Расположение рамки на форме
 
-        tk.Button(btn_frame, text="Сохранить", command=self.save).pack(side=tk.LEFT, padx=10)
-        tk.Button(btn_frame, text="Отмена", command=self.destroy).pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text="Сохранить", command=self.save).pack(side=tk.LEFT, padx=10) # Кнопка "Сохранить"
+        tk.Button(btn_frame, text="Отмена", command=self.destroy).pack(side=tk.LEFT, padx=10) # Кнопка "Отмена"
 
     def save(self):
         """Собирает данные из формы и сохраняет заказ"""
-        customer_display = self.customer_var.get().strip()
-        product_display = self.product_var.get().strip()
-        date = self.date_entry.get().strip()
+        customer_display = self.customer_var.get().strip() # Получаем выбранного клиента
+        product_display = self.product_var.get().strip() # Получаем выбранный товар
+        date = self.date_entry.get().strip() # Получаем введённую дату
 
         if not customer_display or not product_display:
-            messagebox.showerror("Ошибка", "Выберите клиента и товар")
+            messagebox.showerror("Ошибка", "Выберите клиента и товар") # Если не выбраны клиент и товар, выдаём ошибку
             return
 
         # Получаем ID клиента и товара из словарей
         try:
-            customer_id = self.customer_id_map.get(customer_display)
-            product_id = self.product_id_map.get(product_display)
+            customer_id = self.customer_id_map.get(customer_display) # Получаем ID клиента
+            product_id = self.product_id_map.get(product_display) # Получаем ID товара
 
             if customer_id is None:
-                raise ValueError("Не удалось определить ID клиента")
+                raise ValueError("Не удалось определить ID клиента") # Если ID клиента не найден, выдаём ошибку
             if product_id is None:
-                raise ValueError("Не удалось определить ID товара")
+                raise ValueError("Не удалось определить ID товара")  # Если ID товара не найден, выдаём ошибку
         except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при обработке данных: {str(e)}")
+            messagebox.showerror("Ошибка", f"Ошибка при обработке данных: {str(e)}") # Обрабатываем общую ошибку
             return
 
-        # Проверяем дату
+        # Проверяем корректность даты
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
@@ -293,16 +294,18 @@ class EditOrderDialog(tk.Toplevel):
 
         # Обновляем или создаем новый заказ
         if self.order:
+            # Редактируем существующий заказ
             self.order.customer_id = customer_id
             self.order.product_id = product_id
             self.order.date = date
-            db.update_order(self.order)
+            db.update_order(self.order) # Обновляем заказ в базе данных
         else:
+            # Создаем новый заказ
             order = Order(customer_id=customer_id, product_id=product_id, date=date)
-            db.add_order(order)
+            db.add_order(order) # Добавляем новый заказ в базу данных
 
-        self.parent.load_orders()
-        self.destroy()
+        self.parent.load_orders() # Обновляем список заказов в основном окне
+        self.destroy() # Закрываем окно
 
 # Класс наследуется от класса Tk, предоставляя базовую структуру окна приложения.
 class App(tk.Tk):
@@ -502,7 +505,7 @@ class App(tk.Tk):
         filter_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # Поля фильтрации по клиентским данным и датам
-        tk.Label(filter_frame, text="Клиент:").grid(row=0, column=0, padx=5)
+        tk.Label(filter_frame, text="ФИО или Тел:").grid(row=0, column=0, padx=5)
         self.order_customer_filter = tk.Entry(filter_frame, width=20)
         self.order_customer_filter.grid(row=0, column=1, padx=5)
 
@@ -605,7 +608,7 @@ class App(tk.Tk):
                 reader = csv.reader(f) # Создается объект чтения CSV-файлов
                 next(reader)  # Пропускаем заголовок
                 for row in reader:
-                    if len(row) >= 4:
+                    if len(row) >= 4: # минимум 4 колонки
                         customer = Customer(
                             name=row[0].strip(), # Имя клиента (очищает лишние пробелы перед и после значения)
                             phone=row[1].strip(), # Телефон клиента
@@ -633,7 +636,7 @@ class App(tk.Tk):
                 writer = csv.writer(f) # Создаем объект записи CSV
                 writer.writerow(["ФИО", "Телефон", "Email", "Адрес"]) # Заголовки столбцов
 
-                customers = db.get_all_customers() # олучение всех клиентов из базы
+                customers = db.get_all_customers() # Получение всех клиентов из базы
                 for customer in customers:
                     writer.writerow(customer[1:])  # Пропускаем ID путем среза customer[1:]
 
@@ -655,7 +658,7 @@ class App(tk.Tk):
     def load_customers(self):
         """Загружает клиентов с учетом фильтров"""
         # Удаляем все существующие элементы из дерева клиентов
-        # Это необходимо для обновления представления после изменений фильтров
+        # Это необходимо для обновления после изменений фильтров
         for item in self.customer_tree.get_children():
             self.customer_tree.delete(item)
 
@@ -680,13 +683,12 @@ class App(tk.Tk):
             if email_filter and email_filter not in customer[3].lower(): # customer[3] — email
                 matches = False
 
-            # Если клиент прошёл проверку по всем фильтрам, добавляем его в дерево клиентов
+            # Если клиент прошел проверку по всем фильтрам, добавляем его в дерево клиентов
             if matches:
                 self.customer_tree.insert("", tk.END, values=customer)
 
+
     # Аналогичные методы для товаров и заказов (load_orders, add_order, load_products, add_product,  edit_product и т.д.)
-
-
 
     def apply_product_filters(self):
         """Применяет фильтры для товаров"""
@@ -698,9 +700,6 @@ class App(tk.Tk):
         self.product_price_min_filter.delete(0, tk.END)
         self.product_price_max_filter.delete(0, tk.END)
         self.load_products()
-
-    # def add_product(self):
-    #     EditProductDialog(self)
 
     def load_products(self):
         """Загружает товары с учетом фильтров"""
@@ -739,93 +738,6 @@ class App(tk.Tk):
 
             if matches:
                 self.product_tree.insert("", tk.END, values=product)
-
-    # def add_order(self):
-    #     EditOrderDialog(self)
-
-    def apply_order_filters(self):
-        """Применяет фильтры для заказов"""
-        self.load_orders()
-
-    def reset_order_filters(self):
-        """Сбрасывает фильтры заказов"""
-        self.order_customer_filter.delete(0, tk.END)
-        self.order_product_filter.delete(0, tk.END)
-        self.order_date_min_filter.delete(0, tk.END)
-        self.order_date_max_filter.delete(0, tk.END)
-        self.load_orders()
-
-    def load_orders(self):
-        """Загружает заказы с учетом фильтров"""
-        for item in self.order_tree.get_children():
-            self.order_tree.delete(item)
-
-        # Получаем значения фильтров
-        customer_filter = self.order_customer_filter.get().strip().lower()
-        product_filter = self.order_product_filter.get().strip().lower()
-        date_min = self.order_date_min_filter.get().strip()
-        date_max = self.order_date_max_filter.get().strip()
-
-        # Загрузка данных с фильтрацией
-        orders = db.get_all_orders()
-        for order in orders:
-            matches = True
-
-            # Фильтр по клиенту (ФИО или телефон)
-            if customer_filter:
-                customer_match = (customer_filter in order[1].lower() or
-                                  customer_filter in order[2].lower())
-                if not customer_match:
-                    matches = False
-
-            # Фильтр по товару
-            if product_filter and product_filter not in order[3].lower():
-                matches = False
-
-            # Фильтр по дате
-            if date_min and order[5] < date_min:
-                matches = False
-
-            if date_max and order[5] > date_max:
-                matches = False
-
-            if matches:
-                self.order_tree.insert("", tk.END, values=order)
-
-
-    # Общие методы
-    def sort_treeview(self, treeview, col):
-        """Сортирует данные в Treeview по выбранному столбцу"""
-        data = [(treeview.set(child, col), child) for child in treeview.get_children('')]
-        data.sort()
-
-        for index, (_, child) in enumerate(data):
-            treeview.move(child, '', index)
-
-    def generate_report(self, report_type):
-        """Генерирует отчеты и выводит информацию о результате"""
-        try:
-            if report_type == "top_products":
-                filename = generate_sales_report()
-                message = "Отчет 'Топ товаров' сохранен в файл: " + filename
-            elif report_type == "orders_dynamics":
-                filename = generate_orders_dynamics()
-                message = "Отчет 'Динамика заказов' сохранен в файл: " + filename
-            else:
-                messagebox.showerror("Ошибка", "Неизвестный тип отчета")
-                return
-
-            # Выводим информацию о сгенерированном отчете
-            self.report_info.config(state=tk.NORMAL)
-            self.report_info.delete(1.0, tk.END)
-            self.report_info.insert(tk.END, message + "\n\n")
-            self.report_info.insert(tk.END, "Чтобы открыть файл, перейдите в папку с программой.")
-            self.report_info.config(state=tk.DISABLED)
-
-            messagebox.showinfo("Успех", message)
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка генерации отчета: {str(e)}")
-
 
 
     def add_product(self):
@@ -875,19 +787,19 @@ class App(tk.Tk):
                 reader = csv.reader(f)
                 next(reader)  # Пропускаем заголовок
                 for row in reader:
-                    if len(row) >= 2:
+                    if len(row) >= 2: # минимум 2 колонки
                         try:
-                            price = float(row[1])
+                            price = float(row[1]) # цена товара
                         except ValueError:
-                            price = 0.0
+                            price = 0.0 # если ошибка (не float) = 0
 
                         product = Product(
-                            name=row[0].strip(),
-                            price=price
+                            name=row[0].strip(), # название товара
+                            price=price # цена
                         )
-                        db.add_product(product)
+                        db.add_product(product) # добавляем в базу
 
-            self.load_products()
+            self.load_products() # обновляет список товаров
             messagebox.showinfo("Успех", "Данные успешно импортированы")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта: {str(e)}")
@@ -897,16 +809,16 @@ class App(tk.Tk):
         filepath = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV Files", "*.csv")]
-        )
+        ) # Запрашиваем путь к файлу для сохранения
         if not filepath:
-            return
+            return # Выходим если файла нет
 
         try:
-            with open(filepath, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerow(["Название", "Цена"])
+            with open(filepath, 'w', newline='', encoding='utf-8') as f: # Файл для записи ('w')
+                writer = csv.writer(f) # Создаем объект записи CSV
+                writer.writerow(["Название", "Цена"]) # Заголовки столбцов
 
-                products = db.get_all_products()
+                products = db.get_all_products() # Получение всех товаров из базы
                 for product in products:
                     writer.writerow([product[1], product[2]])  # Название и цена
 
@@ -915,21 +827,71 @@ class App(tk.Tk):
             messagebox.showerror("Ошибка", f"Ошибка экспорта: {str(e)}")
 
 
+    def apply_order_filters(self):
+        """Применяет фильтры для заказов"""
+        self.load_orders()
+
+    def reset_order_filters(self):
+        """Сбрасывает фильтры заказов"""
+        self.order_customer_filter.delete(0, tk.END) # очистка всего текста, внутри поля
+        self.order_product_filter.delete(0, tk.END)
+        self.order_date_min_filter.delete(0, tk.END)
+        self.order_date_max_filter.delete(0, tk.END)
+        self.load_orders() # Обновление списка клиентов
+
+    def load_orders(self):
+        """Загружает заказы с учетом фильтров"""
+        for item in self.order_tree.get_children():
+            self.order_tree.delete(item) # Удаляем все существующие элементы из дерева
+
+        # Получаем значения фильтров, преобразуя их в нижний регистр и обрезая лишнее пространство
+        customer_filter = self.order_customer_filter.get().strip().lower()
+        product_filter = self.order_product_filter.get().strip().lower()
+        date_min = self.order_date_min_filter.get().strip()
+        date_max = self.order_date_max_filter.get().strip()
+
+        # Загрузка данных с фильтрацией
+        orders = db.get_all_orders()
+        for order in orders:
+            matches = True # Изначально считаем, что все подходят фильтру
+
+            # Фильтр по клиенту (ФИО или телефон)
+            if customer_filter:
+                customer_match = (customer_filter in order[1].lower() or
+                                  customer_filter in order[2].lower())
+                if not customer_match:
+                    matches = False
+
+            # Фильтр по товару
+            if product_filter and product_filter not in order[3].lower():
+                matches = False
+
+            # Фильтр по дате
+            if date_min and order[5] < date_min:
+                matches = False
+
+            if date_max and order[5] > date_max:
+                matches = False
+
+            if matches: # Если прошел проверку по всем фильтрам, добавляем его в дерево
+                self.order_tree.insert("", tk.END, values=order)
+
     def add_order(self):
         """Открывает диалог добавления нового заказа"""
         EditOrderDialog(self)
 
     def edit_order(self):
         """Открывает диалог редактирования выбранного заказа"""
-        selected = self.order_tree.selection()
+        selected = self.order_tree.selection() # Выбираем выделенный заказ
         if not selected:
             messagebox.showwarning("Предупреждение", "Выберите заказ для редактирования")
             return
-
+        # Извлекаем ID
         item = self.order_tree.item(selected[0])
         order_id = item['values'][0]
+        # Получаем данные по найденному ID
         order_data = db.fetch_query("SELECT * FROM orders WHERE id=?", (order_id,))[0]
-
+        # Запоминаем поля для редактирования, текущими значениями
         order = Order(
             id=order_data[0],
             customer_id=order_data[1],
@@ -948,30 +910,30 @@ class App(tk.Tk):
 
         if messagebox.askyesno("Подтверждение", "Удалить выбранный заказ?"):
             item = self.order_tree.item(selected[0])
-            order_id = item['values'][0]
-            db.delete_order(order_id)
-            self.load_orders()
+            order_id = item['values'][0] # Определение ID
+            db.delete_order(order_id) # Удаление из базы по ID
+            self.load_orders() # Перезагружаем список
 
     def import_order_csv(self):
         """Импортирует заказы из CSV файла"""
         filepath = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
         if not filepath:
-            return
-
+            return # Выходим если файл не выбран
+        # Чтение данных из файла
         try:
             with open(filepath, newline='', encoding='utf-8') as f:
-                reader = csv.reader(f)
+                reader = csv.reader(f) # Создается объект чтения CSV-файлов
                 next(reader)  # Пропускаем заголовок
                 for row in reader:
-                    if len(row) >= 3:
+                    if len(row) >= 3: # минимум 3 колонки
                         order = Order(
-                            customer_id=int(row[0]),
-                            product_id=int(row[1]),
-                            date=row[2].strip()
+                            customer_id=int(row[0]), # ID клиента
+                            product_id=int(row[1]), # ID товара
+                            date=row[2].strip() # дата заказа
                         )
-                        db.add_order(order)
+                        db.add_order(order) # новый заказ добавляется в базу данных
 
-            self.load_orders()
+            self.load_orders() # обновляет список
             messagebox.showinfo("Успех", "Данные успешно импортированы")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта: {str(e)}")
@@ -981,15 +943,15 @@ class App(tk.Tk):
         filepath = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV Files", "*.csv")]
-        )
+        ) # Запрашиваем путь к файлу для сохранения
         if not filepath:
-            return
+            return # Выходим если файла нет
 
         try:
             with open(filepath, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
-                writer.writerow(["ID клиента", "ID товара", "Дата заказа"])
-
+                writer.writerow(["ID клиента", "ID товара", "Дата заказа"]) # Заголовки столбцов
+                # Получение всех заказов из базы
                 orders = db.fetch_query("SELECT customer_id, product_id, date FROM orders")
                 for order in orders:
                     writer.writerow(order)
@@ -997,3 +959,44 @@ class App(tk.Tk):
             messagebox.showinfo("Успех", "Данные успешно экспортированы")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка экспорта: {str(e)}")
+
+
+    # Общие методы
+    def sort_treeview(self, treeview, col): # Treeview, в котором нужно произвести сортировку. col: Имя колонки, по которой будет выполнена сортировка.
+        """
+        Сортирует данные в Treeview по выбранному столбцу
+        получаем все элементы метод get_children.
+        Формируем список кортежей, где каждый кортеж содержит:
+        значения колонки, уникальные идентификатор
+
+        """
+        data = [(treeview.set(child, col), child) for child in treeview.get_children('')]
+        data.sort() # Мы используем метод sort() непосредственно на списке кортежей
+
+        for index, (_, child) in enumerate(data):
+            treeview.move(child, '', index) # Метод move() перемещает элемент (child) на новую позицию в дереве.
+
+    def generate_report(self, report_type):
+        """Генерирует отчеты и выводит информацию о результате"""
+        try:
+            if report_type == "top_products": # Генерация отчета "Топ товаров"
+                filename = generate_sales_report() # Генерируем отчёт продаж
+                message = "Отчет 'Топ товаров' сохранен в файл: " + filename # Формируем сообщение
+            elif report_type == "orders_dynamics": # Генерация отчета "Динамика заказов"
+                filename = generate_orders_dynamics() # Генерируем динамику заказов
+                message = "Отчет 'Динамика заказов' сохранен в файл: " + filename # Формируем сообщение
+            else:
+                messagebox.showerror("Ошибка", "Неизвестный тип отчета") # Сообщаем об ошибке
+                return
+
+            # Выводим информацию о создании отчета в специальное текстовое поле
+            self.report_info.config(state=tk.NORMAL)  # Включаем возможность редактирования поля
+            self.report_info.delete(1.0, tk.END) # Очищаем предыдущее содержание
+            self.report_info.insert(tk.END, message + "\n\n") # Вставляем новое сообщение
+            self.report_info.insert(tk.END, "Чтобы открыть файл, перейдите в папку с программой.") # Дополнительная подсказка
+            self.report_info.config(state=tk.DISABLED) # Возвращаем режим "только для чтения"
+            # Дополнительно показываем окошко с информацией о сохранении отчета
+            messagebox.showinfo("Успех", message)
+        except Exception as e: # Ловим любые непредвиденные ошибки
+            messagebox.showerror("Ошибка", f"Ошибка генерации отчета: {str(e)}")
+
